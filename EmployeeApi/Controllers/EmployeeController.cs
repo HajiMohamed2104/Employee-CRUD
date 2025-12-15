@@ -1,135 +1,90 @@
 ﻿using AutoMapper;
-using EmployeeApi.Data;
 using EmployeeApi.DTOs;
+using EmployeeApi.Interfaces;
 using EmployeeApi.Models;
+using EmployeeApi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace EmployeeApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class EmployeeController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IEmployeeService _employeeService;
         private readonly IMapper _mapper;
 
-        public EmployeeController(AppDbContext context, IMapper mapper)
+        public EmployeeController(IEmployeeService employeeService, IMapper mapper)
         {
-            _context = context;
+            _employeeService = employeeService;
             _mapper = mapper;
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin,User")]
         public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetEmployees()
         {
-            try
-            {
-                var employees = await _context.Employees.ToListAsync();
-                var employeeDtos = _mapper.Map<IEnumerable<EmployeeDto>>(employees);
-                return Ok(employeeDtos);
-            }
-            catch (Exception ex)
-            {
-                // Basic Exception Handling
-                return StatusCode(500, $"Internal Server Error: {ex.Message}");
-            }
+            var employees = await _employeeService.GetAllAsync();
+            return Ok(_mapper.Map<IEnumerable<EmployeeDto>>(employees));
         }
 
-        [HttpGet("{Employee View Id}")]
+        [HttpGet("{id}")]
+        [Authorize(Roles = "Admin,User")]
         public async Task<ActionResult<EmployeeDto>> GetEmployee(int id)
         {
-            var employee = await _context.Employees.FindAsync(id);
-
-            if (employee == null)
-            {
-                return NotFound($"Employee with Id {id} not found.");
-            }
-
+            var employee = await _employeeService.GetByIdAsync(id);
+            if (employee == null) return NotFound();
             return Ok(_mapper.Map<EmployeeDto>(employee));
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<EmployeeDto>> CreateEmployee(CreateEmployeeDto createDto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            var employee = _mapper.Map<Employee>(createDto);
+            var createdEmployee = await _employeeService.CreateAsync(employee);
 
-            try
-            {
-                // Map DTO to Entity
-                var employee = _mapper.Map<Employee>(createDto);
-
-                _context.Employees.Add(employee);
-                await _context.SaveChangesAsync();
-
-                // Map back to DTO for response
-                var returnDto = _mapper.Map<EmployeeDto>(employee);
-
-                return CreatedAtAction(nameof(GetEmployee), new { id = employee.Id }, returnDto);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, "Error creating employee record.");
-            }
+            var returnDto = _mapper.Map<EmployeeDto>(createdEmployee);
+            return CreatedAtAction(nameof(GetEmployee), new { id = createdEmployee.Id }, returnDto);
         }
 
-        [HttpPut("{Update Employee Details}")]
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateEmployee(int id, CreateEmployeeDto updateDto)
         {
-            var employee = await _context.Employees.FindAsync(id);
-            if (employee == null) return NotFound();
+            var employee = _mapper.Map<Employee>(updateDto);
 
-            _mapper.Map(updateDto, employee);
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                return StatusCode(500, "Concurrency error occurred.");
-            }
+            var result = await _employeeService.UpdateAsync(id, employee);
+            if (!result) return NotFound();
 
             return NoContent();
         }
 
-        [HttpDelete("{Delete Employee Details}")]
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteEmployee(int id)
         {
-            var employee = await _context.Employees.FindAsync(id);
-            if (employee == null) return NotFound();
-
-            _context.Employees.Remove(employee);
-            await _context.SaveChangesAsync();
+            var result = await _employeeService.DeleteAsync(id);
+            if (!result) return NotFound();
 
             return NoContent();
         }
 
         [HttpGet("high-salary")]
+        [Authorize(Roles = "Admin,User")]
         public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetHighEarners([FromQuery] decimal minSalary)
         {
-            var highEarners = await _context.Employees
-                .Where(e => e.Salary >= minSalary)
-                .OrderByDescending(e => e.Salary)
-                .ToListAsync();
-
-            return Ok(_mapper.Map<IEnumerable<EmployeeDto>>(highEarners));
+            var employees = await _employeeService.GetHighEarnersAsync(minSalary);
+            return Ok(_mapper.Map<IEnumerable<EmployeeDto>>(employees));
         }
 
         [HttpGet("stats")]
-        public async Task<IActionResult> GetDepartmentStats()
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<IEnumerable<DepartmentStatsDto>>> GetDepartmentStats()
         {
-            var stats = await _context.Employees
-                .GroupBy(e => e.Department)
-                .Select(g => new
-                {
-                    Department = g.Key,
-                    Count = g.Count(),
-                    TotalSalary = g.Sum(e => e.Salary),
-                    AverageSalary = g.Average(e => e.Salary)
-                })
-                .ToListAsync();
-
+            var stats = await _employeeService.GetDepartmentStatsAsync();
             return Ok(stats);
         }
     }

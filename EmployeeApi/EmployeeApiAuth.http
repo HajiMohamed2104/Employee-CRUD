@@ -1,0 +1,109 @@
+### Register a new Admin User
+POST https://localhost:7243/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "Admin123!",
+  "role": "Admin"
+}
+
+###
+
+### Register a new Regular User
+POST https://localhost:7243/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "user",
+  "password": "User123!",
+  "role": "User"
+}
+
+###
+
+### Login as Admin and get JWT Token
+POST https://localhost:7243/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "Admin123!"
+}
+
+###
+
+### Login as User and get JWT Token
+POST https://localhost:7243/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "user",
+  "password": "User123!"
+}
+
+###
+
+### Get all employees (Admin or User role required)
+GET https://localhost:7243/api/employee
+Authorization: Bearer {{admin_token}}
+
+###
+
+### Get employee by ID (Admin or User role required)
+GET https://localhost:7243/api/employee/1
+Authorization: Bearer {{user_token}}
+
+###
+
+### Create new employee (Admin role required)
+POST https://localhost:7243/api/employee
+Authorization: Bearer {{admin_token}}
+Content-Type: application/json
+
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@example.com",
+  "phoneNumber": "123-456-7890",
+  "department": "IT",
+  "position": "Software Developer",
+  "salary": 75000,
+  "hireDate": "2023-01-15"
+}
+
+###
+
+### Update employee (Admin role required)
+PUT https://localhost:7243/api/employee/1
+Authorization: Bearer {{admin_token}}
+Content-Type: application/json
+
+{
+  "firstName": "John",
+  "lastName": "Smith",
+  "email": "john.smith@example.com",
+  "phoneNumber": "123-456-7890",
+  "department": "IT",
+  "position": "Senior Software Developer",
+  "salary": 85000,
+  "hireDate": "2023-01-15"
+}
+
+###
+
+### Delete employee (Admin role required)
+DELETE https://localhost:7243/api/employee/1
+Authorization: Bearer {{admin_token}}
+
+###
+
+### Get high earners (Admin or User role required)
+GET https://localhost:7243/api/employee/high-salary?minSalary=70000
+Authorization: Bearer {{user_token}}
+
+###
+
+### Get department statistics (Admin role required)
+GET https://localhost:7243/api/employee/stats
+Authorization: Bearer {{admin_token}}
