@@ -1,6 +1,5 @@
 ﻿using EmployeeApi.Models;
 using Microsoft.EntityFrameworkCore;
-
 namespace EmployeeApi.Data
 {
     public class AppDbContext : DbContext
@@ -9,5 +8,6 @@ namespace EmployeeApi.Data
         {
         }
         public DbSet<Employee> Employees { get; set; }
+        public DbSet<User> Users { get; set; }
     }
 }
