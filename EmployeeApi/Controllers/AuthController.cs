@@ -17,7 +17,7 @@ namespace EmployeeApi.Controllers
             _authService = authService;
         }
 
-        [HttpPost("register")]
+        [HttpPost("Register")]
         public async Task<IActionResult> Register(RegisterDto request)
         {
             if (request.Role != "Admin" && request.Role != "User")
@@ -41,7 +41,7 @@ namespace EmployeeApi.Controllers
             return Ok(result);
         }
 
-        [HttpPost("login")]
+        [HttpPost("Login")]
         public async Task<IActionResult> Login(LoginDto request)
         {
             var token = await _authService.LoginAsync(request.Username, request.Password);

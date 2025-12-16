@@ -30,7 +30,7 @@ namespace EmployeeApi.Controllers
             return Ok(_mapper.Map<IEnumerable<EmployeeDto>>(employees));
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("View-Employee-Details")]
         [Authorize(Roles = "Admin,User")]
         public async Task<ActionResult<EmployeeDto>> GetEmployee(int id)
         {
@@ -50,7 +50,7 @@ namespace EmployeeApi.Controllers
             return CreatedAtAction(nameof(GetEmployee), new { id = createdEmployee.Id }, returnDto);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("Update-Employee_Details")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateEmployee(int id, CreateEmployeeDto updateDto)
         {
@@ -62,7 +62,7 @@ namespace EmployeeApi.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("Delete-Employee-Details")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteEmployee(int id)
         {
@@ -72,7 +72,7 @@ namespace EmployeeApi.Controllers
             return NoContent();
         }
 
-        [HttpGet("high-salary")]
+        [HttpGet("High-Salary")]
         [Authorize(Roles = "Admin,User")]
         public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetHighEarners([FromQuery] decimal minSalary)
         {
@@ -80,7 +80,7 @@ namespace EmployeeApi.Controllers
             return Ok(_mapper.Map<IEnumerable<EmployeeDto>>(employees));
         }
 
-        [HttpGet("stats")]
+        [HttpGet("Stats")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<DepartmentStatsDto>>> GetDepartmentStats()
         {
