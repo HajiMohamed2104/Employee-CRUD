@@ -6,7 +6,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-
 namespace EmployeeApi.Services
 {
     public class AuthService : IAuthService
@@ -24,7 +23,7 @@ namespace EmployeeApi.Services
         {
             if (await _context.Users.AnyAsync(u => u.Username == user.Username))
             {
-                return null; // User already exists
+                return null;
             }
 
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(password);

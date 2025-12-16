@@ -3,7 +3,6 @@ using EmployeeApi.Interfaces;
 using EmployeeApi.Models;
 using EmployeeApi.Services;
 using Microsoft.AspNetCore.Mvc;
-
 namespace EmployeeApi.Controllers
 {
     [Route("api/[controller]")]
@@ -28,7 +27,7 @@ namespace EmployeeApi.Controllers
             var user = new User
             {
                 Username = request.Username,
-                PasswordHash = string.Empty, // Will be hashed in service
+                PasswordHash = string.Empty,
                 Role = request.Role
             };
 
@@ -37,7 +36,6 @@ namespace EmployeeApi.Controllers
             {
                 return BadRequest("User already exists.");
             }
-
             return Ok(result);
         }
 

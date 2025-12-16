@@ -4,7 +4,6 @@ using EmployeeApi.Interfaces;
 using EmployeeApi.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-
 namespace EmployeeApi.Services
 {
     public class EmployeeService : IEmployeeService
@@ -74,11 +73,11 @@ namespace EmployeeApi.Services
             return true;
         }
 
-        public async Task<IEnumerable<Employee>> GetHighEarnersAsync(decimal minSalary)
+        public async Task<IEnumerable<Employee>> GetHighEarnersAsync(decimal minSalary, decimal maxSalary)
         {
-            _logger.LogInformation("Fetching high earners with salary >= {MinSalary}", minSalary);
+            _logger.LogInformation("Fetching high earners with salary between {MinSalary} and {MaxSalary}", minSalary, maxSalary);
             return await _context.Employees
-                .Where(e => e.Salary >= minSalary)
+                .Where(e => e.Salary >= minSalary && e.Salary <= maxSalary)
                 .OrderByDescending(e => e.Salary)
                 .ToListAsync();
         }
