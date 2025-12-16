@@ -4,7 +4,6 @@ using EmployeeApi.Interfaces;
 using EmployeeApi.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-
 namespace EmployeeApi.Services
 {
     public class EmployeeService : IEmployeeService

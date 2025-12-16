@@ -5,7 +5,6 @@ using EmployeeApi.Models;
 using EmployeeApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
 namespace EmployeeApi.Controllers
 {
     [Route("api/[controller]")]
@@ -22,7 +21,7 @@ namespace EmployeeApi.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet]
+        [HttpGet("View-All-Employees")]
         [Authorize(Roles = "Admin,User")]
         public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetEmployees()
         {
@@ -39,7 +38,7 @@ namespace EmployeeApi.Controllers
             return Ok(_mapper.Map<EmployeeDto>(employee));
         }
 
-        [HttpPost]
+        [HttpPost("Add-New-Employees")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<EmployeeDto>> CreateEmployee(CreateEmployeeDto createDto)
         {

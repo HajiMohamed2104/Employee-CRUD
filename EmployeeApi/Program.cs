@@ -11,7 +11,6 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-#region Serilog Configuration
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .WriteTo.Console()
@@ -19,27 +18,15 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 builder.Host.UseSerilog();
-#endregion
-
-#region Database
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
-#endregion
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-#region Dependency Injection
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
-#endregion
-
-#region AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
-#endregion
-
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-#region Swagger + JWT Configuration
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
@@ -74,9 +61,7 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
-#endregion
 
-#region JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -99,11 +84,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddAuthorization();
-#endregion
 
 var app = builder.Build();
 
-#region Middleware Pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -111,13 +94,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseSerilogRequestLogging();
-
 app.UseHttpsRedirection();
-
-app.UseAuthentication();   // MUST come before Authorization
+app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
-#endregion
-
 app.Run();
