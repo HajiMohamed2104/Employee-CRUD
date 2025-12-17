@@ -19,22 +19,31 @@ namespace EmployeeApi.Controllers
         [HttpPost("Register")]
         public async Task<IActionResult> Register(RegisterDto request)
         {
-            if (request.Role != "Admin" && request.Role != "User")
+            string normalizedRole;
+            if (string.Equals(request.Role, "Admin", StringComparison.OrdinalIgnoreCase))
             {
-                return BadRequest("Role must be either 'Admin' or 'User'.");
+                normalizedRole = "Admin";
+            }
+            else if (string.Equals(request.Role, "User", StringComparison.OrdinalIgnoreCase))
+            {
+                normalizedRole = "User";
+            }
+            else
+            {
+                return StatusCode(401,"Role must be either 'Admin' or 'User'.");
             }
 
             var user = new User
             {
                 Username = request.Username,
                 PasswordHash = string.Empty,
-                Role = request.Role
+                Role = normalizedRole
             };
 
             var result = await _authService.RegisterAsync(user, request.Password);
             if (result == null)
             {
-                return BadRequest("User already exists.");
+                return StatusCode(409, "User already exists.");
             }
             return Ok(result);
         }
@@ -45,7 +54,7 @@ namespace EmployeeApi.Controllers
             var token = await _authService.LoginAsync(request.Username, request.Password);
             if (token == null)
             {
-                return BadRequest("Invalid username or password.");
+                return StatusCode(404,"Invalid username or password.");
             }
 
             return Ok(new { Token = token });

@@ -56,9 +56,9 @@ namespace EmployeeApi.Controllers
             var employee = _mapper.Map<Employee>(updateDto);
 
             var result = await _employeeService.UpdateAsync(id, employee);
-            if (!result) return NotFound();
+            if (!result) return NotFound("Employee Record Not Found");
 
-            return NoContent();
+            return Ok("Employee Details Updated Successfully");
         }
 
         [HttpDelete("Delete-Employee-Details")]
@@ -66,15 +66,20 @@ namespace EmployeeApi.Controllers
         public async Task<IActionResult> DeleteEmployee(int id)
         {
             var result = await _employeeService.DeleteAsync(id);
-            if (!result) return NotFound();
+            if (!result) return NotFound("Employee Not Found");
 
-            return NoContent();
+            return Ok("Employee Deleted Successfully");
         }
 
         [HttpGet("High-Salary")]
         [Authorize(Roles = "Admin,User")]
         public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetHighEarners([FromQuery] decimal minSalary, [FromQuery] decimal maxSalary)
         {
+            if (minSalary > maxSalary)
+            {
+                return BadRequest("Minimum salary cannot be greater than maximum salary.");
+            }
+
             var employees = await _employeeService.GetHighEarnersAsync(minSalary, maxSalary);
             return Ok(_mapper.Map<IEnumerable<EmployeeDto>>(employees));
         }
