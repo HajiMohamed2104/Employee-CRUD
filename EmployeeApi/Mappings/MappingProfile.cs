@@ -11,7 +11,7 @@ namespace EmployeeApi.Mappings
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => $"{src.FirstName} {src.LastName}"));
 
             CreateMap<CreateEmployeeDto, Employee>()
-                .ForMember(dest => dest.DateJoined, opt => opt.MapFrom(src => DateTime.Now)); // Default value
+                .ForMember(dest => dest.DateJoined, opt => opt.MapFrom(src => DateTime.Now));
         }
     }
 }
