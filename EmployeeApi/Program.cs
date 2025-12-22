@@ -33,7 +33,6 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "Employee API",
         Version = "v1",
-        Description = "Employee Management API with JWT Authentication"
     });
 
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
