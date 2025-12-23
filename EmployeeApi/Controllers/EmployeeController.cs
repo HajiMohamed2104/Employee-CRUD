@@ -31,7 +31,6 @@ namespace EmployeeApi.Controllers
             try
             {
                 var employees = await _employeeService.GetAllAsync();
-
                 _logger.LogInformation("200 OK - GetEmployees - Employees fetched successfully");
                 return Ok(_mapper.Map<IEnumerable<EmployeeDto>>(employees));
             }
@@ -49,13 +48,11 @@ namespace EmployeeApi.Controllers
             try
             {
                 var employee = await _employeeService.GetByIdAsync(id);
-
                 if (employee == null)
                 {
                     _logger.LogWarning("404 NotFound - GetEmployee - EmployeeId: {Id}", id);
                     return NotFound("Employee not found");
                 }
-
                 _logger.LogInformation("200 OK - GetEmployee - EmployeeId: {Id}", id);
                 return Ok(_mapper.Map<EmployeeDto>(employee));
             }
@@ -74,7 +71,6 @@ namespace EmployeeApi.Controllers
             {
                 var employee = _mapper.Map<Employee>(dto);
                 await _employeeService.CreateAsync(employee);
-
                 _logger.LogInformation("200 OK - CreateEmployee - Employee created");
                 return Ok("Employee created successfully");
             }
@@ -92,13 +88,11 @@ namespace EmployeeApi.Controllers
             try
             {
                 var updated = await _employeeService.UpdateAsync(id, _mapper.Map<Employee>(dto));
-
                 if (!updated)
                 {
                     _logger.LogWarning("404 NotFound - UpdateEmployee - EmployeeId: {Id}", id);
                     return NotFound("Employee record not found");
                 }
-
                 _logger.LogInformation("200 OK - UpdateEmployee - EmployeeId: {Id}", id);
                 return Ok("Employee updated successfully");
             }
@@ -116,13 +110,11 @@ namespace EmployeeApi.Controllers
             try
             {
                 var deleted = await _employeeService.DeleteAsync(id);
-
                 if (!deleted)
                 {
                     _logger.LogWarning("404 NotFound - DeleteEmployee - EmployeeId: {Id}", id);
                     return NotFound("Employee not found");
                 }
-
                 _logger.LogInformation("200 OK - DeleteEmployee - EmployeeId: {Id}", id);
                 return Ok("Employee deleted successfully");
             }
@@ -146,7 +138,6 @@ namespace EmployeeApi.Controllers
                 }
 
                 var employees = await _employeeService.GetHighEarnersAsync(minSalary, maxSalary);
-
                 _logger.LogInformation("200 OK - GetHighEarners");
                 return Ok(_mapper.Map<IEnumerable<EmployeeDto>>(employees));
             }
@@ -164,7 +155,6 @@ namespace EmployeeApi.Controllers
             try
             {
                 var stats = await _employeeService.GetDepartmentStatsAsync();
-
                 _logger.LogInformation("200 OK - GetDepartmentStats");
                 return Ok(stats);
             }
