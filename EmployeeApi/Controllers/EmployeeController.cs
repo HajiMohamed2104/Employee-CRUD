@@ -2,10 +2,10 @@
 using EmployeeApi.DTOs;
 using EmployeeApi.Interfaces;
 using EmployeeApi.Models;
-using EmployeeApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+
 namespace EmployeeApi.Controllers
 {
     [Route("api/[controller]")]
@@ -26,128 +26,152 @@ namespace EmployeeApi.Controllers
 
         [HttpGet("View-All-Employees")]
         [Authorize(Roles = "Admin,User")]
-        public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetEmployees()
+        public async Task<IActionResult> GetEmployees()
         {
             try
             {
                 var employees = await _employeeService.GetAllAsync();
+
+                _logger.LogInformation("200 OK - GetEmployees - Employees fetched successfully");
                 return Ok(_mapper.Map<IEnumerable<EmployeeDto>>(employees));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while fetching all employees.");
-                return StatusCode(500, "Internal Server Error. Please try again later.");
+                _logger.LogError(ex, "500 Internal Server Error - GetEmployees");
+                return StatusCode(500, "Internal Server Error");
             }
         }
 
-        [HttpGet("View-Employee-Details")]
+        [HttpGet("View-Employee-Details/{id:int}")]
         [Authorize(Roles = "Admin,User")]
-        public async Task<ActionResult<EmployeeDto>> GetEmployee(int id)
+        public async Task<IActionResult> GetEmployee(int id)
         {
             try
             {
                 var employee = await _employeeService.GetByIdAsync(id);
-                if (employee == null) return NotFound();
+
+                if (employee == null)
+                {
+                    _logger.LogWarning("404 NotFound - GetEmployee - EmployeeId: {Id}", id);
+                    return NotFound("Employee not found");
+                }
+
+                _logger.LogInformation("200 OK - GetEmployee - EmployeeId: {Id}", id);
                 return Ok(_mapper.Map<EmployeeDto>(employee));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while fetching employee with ID {Id}.", id);
-                return StatusCode(500, "Internal Server Error. Please try again later.");
+                _logger.LogError(ex, "500 Internal Server Error - GetEmployee - EmployeeId: {Id}", id);
+                return StatusCode(500, "Internal Server Error");
             }
         }
 
         [HttpPost("Add-New-Employees")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<EmployeeDto>> CreateEmployee(CreateEmployeeDto createDto)
+        public async Task<IActionResult> CreateEmployee(CreateEmployeeDto dto)
         {
             try
             {
-                var employee = _mapper.Map<Employee>(createDto);
-                var createdEmployee = await _employeeService.CreateAsync(employee);
+                var employee = _mapper.Map<Employee>(dto);
+                await _employeeService.CreateAsync(employee);
 
-                var returnDto = _mapper.Map<EmployeeDto>(createdEmployee);
-                return CreatedAtAction(nameof(GetEmployee), new { id = createdEmployee.Id }, returnDto);
+                _logger.LogInformation("200 OK - CreateEmployee - Employee created");
+                return Ok("Employee created successfully");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while creating a new employee.");
-                return StatusCode(500, "Internal Server Error. Please try again later.");
+                _logger.LogError(ex, "500 Internal Server Error - CreateEmployee");
+                return StatusCode(500, "Internal Server Error");
             }
         }
 
-        [HttpPut("Update-Employee_Details")]
+        [HttpPut("Update-Employee-Details/{id:int}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateEmployee(int id, CreateEmployeeDto updateDto)
+        public async Task<IActionResult> UpdateEmployee(int id, CreateEmployeeDto dto)
         {
             try
             {
-                var employee = _mapper.Map<Employee>(updateDto);
+                var updated = await _employeeService.UpdateAsync(id, _mapper.Map<Employee>(dto));
 
-                var result = await _employeeService.UpdateAsync(id, employee);
-                if (!result) return NotFound("Employee Record Not Found");
+                if (!updated)
+                {
+                    _logger.LogWarning("404 NotFound - UpdateEmployee - EmployeeId: {Id}", id);
+                    return NotFound("Employee record not found");
+                }
 
-                return Ok("Employee Details Updated Successfully");
+                _logger.LogInformation("200 OK - UpdateEmployee - EmployeeId: {Id}", id);
+                return Ok("Employee updated successfully");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while updating employee with ID {Id}.", id);
-                return StatusCode(500, "Internal Server Error. Please try again later.");
+                _logger.LogError(ex, "500 Internal Server Error - UpdateEmployee - EmployeeId: {Id}", id);
+                return StatusCode(500, "Internal Server Error");
             }
         }
 
-        [HttpDelete("Delete-Employee-Details")]
+        [HttpDelete("Delete-Employee-Details/{id:int}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteEmployee(int id)
         {
             try
             {
-                var result = await _employeeService.DeleteAsync(id);
-                if (!result) return NotFound("Employee Not Found");
+                var deleted = await _employeeService.DeleteAsync(id);
 
-                return Ok("Employee Deleted Successfully");
+                if (!deleted)
+                {
+                    _logger.LogWarning("404 NotFound - DeleteEmployee - EmployeeId: {Id}", id);
+                    return NotFound("Employee not found");
+                }
+
+                _logger.LogInformation("200 OK - DeleteEmployee - EmployeeId: {Id}", id);
+                return Ok("Employee deleted successfully");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while deleting employee with ID {Id}.", id);
-                return StatusCode(500, "Internal Server Error. Please try again later.");
+                _logger.LogError(ex, "500 Internal Server Error - DeleteEmployee - EmployeeId: {Id}", id);
+                return StatusCode(500, "Internal Server Error");
             }
         }
 
         [HttpGet("High-Salary")]
         [Authorize(Roles = "Admin,User")]
-        public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetHighEarners([FromQuery] decimal minSalary, [FromQuery] decimal maxSalary)
+        public async Task<IActionResult> GetHighEarners(decimal minSalary, decimal maxSalary)
         {
             try
             {
                 if (minSalary > maxSalary)
                 {
-                    return BadRequest("Minimum salary cannot be greater than maximum salary.");
+                    _logger.LogWarning("400 BadRequest - GetHighEarners - Invalid salary range");
+                    return BadRequest("Minimum salary cannot be greater than maximum salary");
                 }
 
                 var employees = await _employeeService.GetHighEarnersAsync(minSalary, maxSalary);
+
+                _logger.LogInformation("200 OK - GetHighEarners");
                 return Ok(_mapper.Map<IEnumerable<EmployeeDto>>(employees));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while fetching high earners.");
-                return StatusCode(500, "Internal Server Error. Please try again later.");
+                _logger.LogError(ex, "500 Internal Server Error - GetHighEarners");
+                return StatusCode(500, "Internal Server Error");
             }
         }
 
         [HttpGet("Stats")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<IEnumerable<DepartmentStatsDto>>> GetDepartmentStats()
+        public async Task<IActionResult> GetDepartmentStats()
         {
             try
             {
                 var stats = await _employeeService.GetDepartmentStatsAsync();
+
+                _logger.LogInformation("200 OK - GetDepartmentStats");
                 return Ok(stats);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while fetching department statistics.");
-                return StatusCode(500, "Internal Server Error. Please try again later.");
+                _logger.LogError(ex, "500 Internal Server Error - GetDepartmentStats");
+                return StatusCode(500, "Internal Server Error");
             }
         }
     }
