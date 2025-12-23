@@ -41,7 +41,7 @@ namespace EmployeeApi.Controllers
             }
         }
 
-        [HttpGet("View-Employee-Details/{id:int}")]
+        [HttpGet("View-Employee-Details")]
         [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> GetEmployee(int id)
         {
@@ -81,7 +81,7 @@ namespace EmployeeApi.Controllers
             }
         }
 
-        [HttpPut("Update-Employee-Details/{id:int}")]
+        [HttpPut("Update-Employee-Details")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateEmployee(int id, CreateEmployeeDto dto)
         {
@@ -103,7 +103,7 @@ namespace EmployeeApi.Controllers
             }
         }
 
-        [HttpDelete("Delete-Employee-Details/{id:int}")]
+        [HttpDelete("Delete-Employee-Details")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteEmployee(int id)
         {
