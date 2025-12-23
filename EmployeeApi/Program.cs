@@ -24,7 +24,6 @@ builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
@@ -32,7 +31,6 @@ builder.Services.AddSwaggerGen(c =>
         Title = "Employee API",
         Version = "v1",
     });
-
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -42,7 +40,6 @@ builder.Services.AddSwaggerGen(c =>
         In = ParameterLocation.Header,
         Description = "Enter JWT token like: Bearer {your token}"
     });
-
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -79,7 +76,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ClockSkew = TimeSpan.Zero
         };
     });
-
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
