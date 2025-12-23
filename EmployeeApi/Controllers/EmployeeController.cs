@@ -31,6 +31,7 @@ namespace EmployeeApi.Controllers
             try
             {
                 var employees = await _employeeService.GetAllAsync();
+                _logger.LogInformation("200 OK - GetEmployees - Employees fetched successfully");
                 return Ok(_mapper.Map<IEnumerable<EmployeeDto>>(employees));
             }
             catch (Exception ex)
@@ -47,7 +48,12 @@ namespace EmployeeApi.Controllers
             try
             {
                 var employee = await _employeeService.GetByIdAsync(id);
-                if (employee == null) return NotFound();
+                if (employee == null)
+                {
+                    _logger.LogWarning("404 NotFound - GetEmployee - EmployeeId: {Id}", id);
+                    return NotFound("Employee not found");
+                }
+                _logger.LogInformation("200 OK - GetEmployee - EmployeeId: {Id}", id);
                 return Ok(_mapper.Map<EmployeeDto>(employee));
             }
             catch (Exception ex)
@@ -64,10 +70,9 @@ namespace EmployeeApi.Controllers
             try
             {
                 var employee = _mapper.Map<Employee>(createDto);
-                var createdEmployee = await _employeeService.CreateAsync(employee);
-
-                var returnDto = _mapper.Map<EmployeeDto>(createdEmployee);
-                return CreatedAtAction(nameof(GetEmployee), new { id = createdEmployee.Id }, returnDto);
+                await _employeeService.CreateAsync(employee);
+                _logger.LogInformation("200 OK - CreateEmployee - Employee created");
+                return Ok("Employee created successfully");
             }
             catch (Exception ex)
             {
@@ -76,18 +81,20 @@ namespace EmployeeApi.Controllers
             }
         }
 
-        [HttpPut("Update-Employee_Details")]
+        [HttpPut("Update-Employee-Details")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateEmployee(int id, CreateEmployeeDto updateDto)
         {
             try
             {
-                var employee = _mapper.Map<Employee>(updateDto);
-
-                var result = await _employeeService.UpdateAsync(id, employee);
-                if (!result) return NotFound("Employee Record Not Found");
-
-                return Ok("Employee Details Updated Successfully");
+                var updated = await _employeeService.UpdateAsync(id, _mapper.Map<Employee>(updateDto));
+                if (!updated)
+                {
+                    _logger.LogWarning("404 NotFound - UpdateEmployee - EmployeeId: {Id}", id);
+                    return NotFound("Employee record not found");
+                }
+                _logger.LogInformation("200 OK - UpdateEmployee - EmployeeId: {Id}", id);
+                return Ok("Employee updated successfully");
             }
             catch (Exception ex)
             {
@@ -102,10 +109,14 @@ namespace EmployeeApi.Controllers
         {
             try
             {
-                var result = await _employeeService.DeleteAsync(id);
-                if (!result) return NotFound("Employee Not Found");
-
-                return Ok("Employee Deleted Successfully");
+                var deleted = await _employeeService.DeleteAsync(id);
+                if (!deleted)
+                {
+                    _logger.LogWarning("404 NotFound - DeleteEmployee - EmployeeId: {Id}", id);
+                    return NotFound("Employee not found");
+                }
+                _logger.LogInformation("200 OK - DeleteEmployee - EmployeeId: {Id}", id);
+                return Ok("Employee deleted successfully");
             }
             catch (Exception ex)
             {
@@ -126,6 +137,7 @@ namespace EmployeeApi.Controllers
                 }
 
                 var employees = await _employeeService.GetHighEarnersAsync(minSalary, maxSalary);
+                _logger.LogInformation("200 OK - GetHighEarners");
                 return Ok(_mapper.Map<IEnumerable<EmployeeDto>>(employees));
             }
             catch (Exception ex)
@@ -142,6 +154,7 @@ namespace EmployeeApi.Controllers
             try
             {
                 var stats = await _employeeService.GetDepartmentStatsAsync();
+                _logger.LogInformation("200 OK - GetDepartmentStats");
                 return Ok(stats);
             }
             catch (Exception ex)

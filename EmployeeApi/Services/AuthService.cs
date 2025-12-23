@@ -1,3 +1,4 @@
+using EmployeeApi.DTOs;
 using EmployeeApi.Data;
 using EmployeeApi.Interfaces;
 using EmployeeApi.Models;
@@ -33,7 +34,7 @@ namespace EmployeeApi.Services
             return user;
         }
 
-        public async Task<string?> LoginAsync(string username, string password)
+        public async Task<LoginResultDto?> LoginAsync(string username, string password)
         {
             var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == username);
 
@@ -58,7 +59,13 @@ namespace EmployeeApi.Services
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
+            var generatedToken = tokenHandler.WriteToken(token);
+
+            return new LoginResultDto
+            {
+                Token = generatedToken,
+                Role = user.Role
+            };
         }
     }
 }

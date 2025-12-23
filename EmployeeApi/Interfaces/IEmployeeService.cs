@@ -9,7 +9,7 @@ namespace EmployeeApi.Interfaces
         Task<Employee> CreateAsync(Employee employee);
         Task<bool> UpdateAsync(int id, Employee employee);
         Task<bool> DeleteAsync(int id);
-        Task<IEnumerable<Employee>> GetHighEarnersAsync(decimal minSalary);
+        Task<IEnumerable<Employee>> GetHighEarnersAsync(decimal minSalary, decimal maxSalary);
         Task<IEnumerable<DepartmentStatsDto>> GetDepartmentStatsAsync();
     }
 }
